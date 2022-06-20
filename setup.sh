@@ -5,39 +5,17 @@ set -e
 
 PROJECT_DIR="${DIR}/.."
 source "${DIR}/config.env.sh"
+source "${DIR}/ovhai.secrets.env"
 
-if [ -z "${OVHAI_PLATFORM}" ]; then echo "Missing env OVHAI_PLATFORM"; exit 1; fi
-if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME"; exit 1; fi
-if [ -z "${BITWARDEN_OVHAI_SECRET}" ]; then echo "Missing env BITWARDEN_OVHAI_SECRET"; exit 1; fi
+if [ -z "${OVHAI_PLATFORM}" ]; then echo "Missing env OVHAI_PLATFORM in config.env.sh"; exit 1; fi
+if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME in config.env.sh"; exit 1; fi
 
-load_ovhai_credentials() {
-    echo "# Loading credentials from bitwarden"
+if [ -z "${OVHAI_USERNAME}" ]; then echo "Missing env OVHAI_USERNAME in ovhai.secrets.env"; exit 1; fi
+if [ -z "${OVHAI_PASSWORD}" ]; then echo "Missing env OVHAI_PASSWORD in ovhai.secrets.env"; exit 1; fi
+if [ -z "${OVHAI_PROJECTID}" ]; then echo "Missing env OVHAI_PROJECTID in ovhai.secrets.env"; exit 1; fi
+if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in ovhai.secrets.env"; exit 1; fi
+if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Missing env OVHAI_DOCKER_REGISTRY in ovhai.secrets.env"; exit 1; fi
 
-    if ! which bw >/dev/null; then
-    echo "Please install bitwarden cli https://bitwarden.com/help/cli/"
-    exit
-    fi
-
-    if ! bw list items --search "asdf" > /dev/null 2>&1; then
-    echo "Please login & unlock bitwarden (with exporting BW_SESSION)" > /dev/stderr
-    exit
-    fi
-
-    OVHAI_USERNAME=$(bw get username "${BITWARDEN_OVHAI_SECRET}")
-    OVHAI_PASSWORD=$(bw get password "${BITWARDEN_OVHAI_SECRET}")
-    OVHAI_PROJECTID=$(bw get item "${BITWARDEN_OVHAI_SECRET}" | jq --raw-output '.fields[] | select(.name | contains("projectid")) | .value')
-    OVHAI_REGION=$(bw get item "${BITWARDEN_OVHAI_SECRET}" | jq --raw-output '.fields[] | select(.name | contains("region")) | .value')
-    OVHAI_DOCKER_REGISTRY=$(bw get item "${BITWARDEN_OVHAI_SECRET}" | jq --raw-output '.fields[] | select(.name | contains("docker-registry")) | .value')
-
-    if [ -z "${OVHAI_USERNAME}" ]; then echo "Could not load '.username' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
-    if [ -z "${OVHAI_PASSWORD}" ]; then echo "Could not load '.password' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
-    if [ -z "${OVHAI_PROJECTID}" ]; then echo "Could not load '.fields[name=projectid].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
-    if [ -z "${OVHAI_REGION}" ]; then echo "Could not load '.fields[name=region].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
-    if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Could not load '.fields[name=docker-registry].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
-
-    echo "Done"
-    echo ""
-}
 
 install_ovhai() {
     echo "# Installing ovhai cli for platform ${OVHAI_PLATFORM} and region ${OVHAI_REGION}"
@@ -70,7 +48,6 @@ login_to_ovh_docker_registry() {
     echo ""
 }
 
-load_ovhai_credentials
 install_ovhai
 login_to_ovhai
 login_to_ovh_docker_registry
