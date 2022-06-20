@@ -2,3 +2,5 @@
 /ovhai.me
 /ovhai
 /ovhai*.zip
+/ovhai.me.json
+/docker-registry-prefix.value
