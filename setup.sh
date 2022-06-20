@@ -19,12 +19,12 @@ if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Missing env OVHAI_DOCKER_REGIST
 
 install_ovhai() {
     echo "# Installing ovhai cli for platform ${OVHAI_PLATFORM} and region ${OVHAI_REGION}"
-    rm -rf ovhai*
+    rm -rf ovhai ovhai*.zip
     OVHAI_REGION_LOWERCASE=$(echo "${OVHAI_REGION}" | awk '{print tolower($0)}')
     curl -O "https://cli.${OVHAI_REGION_LOWERCASE}.training.ai.cloud.ovh.net/ovhai-${OVHAI_PLATFORM}.zip"
     echo "Unzipping ovhai"
     unzip "ovhai-${OVHAI_PLATFORM}.zip"
-    rm -rf "ovhai*.zip"
+    rm -rf ovhai*.zip
     echo "Ovhai bin available"
     chmod +x ./ovhai
     echo "Done"
