@@ -6,9 +6,9 @@ set -e
 PROJECT_DIR="${DIR}/.."
 source "${DIR}/config.env.sh"
 
-if [ -z "${OVHAI_PLATFORM}" ]; then echo "Missing env OVHAI_PLATFORM"; exit; fi
-if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME"; exit; fi
-if [ -z "${BITWARDEN_OVHAI_SECRET}" ]; then echo "Missing env BITWARDEN_OVHAI_SECRET"; exit; fi
+if [ -z "${OVHAI_PLATFORM}" ]; then echo "Missing env OVHAI_PLATFORM"; exit 1; fi
+if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME"; exit 1; fi
+if [ -z "${BITWARDEN_OVHAI_SECRET}" ]; then echo "Missing env BITWARDEN_OVHAI_SECRET"; exit 1; fi
 
 load_ovhai_credentials() {
     echo "# Loading credentials from bitwarden"
@@ -29,11 +29,11 @@ load_ovhai_credentials() {
     OVHAI_REGION=$(bw get item "${BITWARDEN_OVHAI_SECRET}" | jq --raw-output '.fields[] | select(.name | contains("region")) | .value')
     OVHAI_DOCKER_REGISTRY=$(bw get item "${BITWARDEN_OVHAI_SECRET}" | jq --raw-output '.fields[] | select(.name | contains("docker-registry")) | .value')
 
-    if [ -z "${OVHAI_USERNAME}" ]; then echo "Could not load '.username' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit; fi
-    if [ -z "${OVHAI_PASSWORD}" ]; then echo "Could not load '.password' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit; fi
-    if [ -z "${OVHAI_PROJECTID}" ]; then echo "Could not load '.fields[name=projectid].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit; fi
-    if [ -z "${OVHAI_REGION}" ]; then echo "Could not load '.fields[name=region].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit; fi
-    if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Could not load '.fields[name=docker-registry].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit; fi
+    if [ -z "${OVHAI_USERNAME}" ]; then echo "Could not load '.username' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
+    if [ -z "${OVHAI_PASSWORD}" ]; then echo "Could not load '.password' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
+    if [ -z "${OVHAI_PROJECTID}" ]; then echo "Could not load '.fields[name=projectid].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
+    if [ -z "${OVHAI_REGION}" ]; then echo "Could not load '.fields[name=region].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
+    if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Could not load '.fields[name=docker-registry].value' from bitwarden secret ${BITWARDEN_OVHAI_SECRET}"; exit 1; fi
 
     echo "Done"
     echo ""
@@ -65,7 +65,7 @@ login_to_ovh_docker_registry() {
     echo "Logging in to docker registry"
     REGISTRY_PREFIX="${OVHAI_DOCKER_REGISTRY}/${OVHAI_PROJECTID}"
     docker login --username "${OVHAI_USERNAME}" --password "${OVHAI_PASSWORD}" "${REGISTRY_PREFIX}"
-    echo "${REGISTRY_PREFIX}" > docker-registry-prefix.value
+    echo -n "${REGISTRY_PREFIX}" > docker-registry-prefix.value
     echo "Done"
     echo ""
 }
