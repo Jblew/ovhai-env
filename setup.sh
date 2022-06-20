@@ -4,17 +4,17 @@ cd "${DIR}"
 set -e
 
 PROJECT_DIR="${DIR}/.."
-source "${DIR}/config.env.sh"
-source "${DIR}/ovhai.secrets.env"
+source "${DIR}/../.env"
+source "${DIR}/ovhai.credentials.env"
 
-if [ -z "${OVHAI_PLATFORM}" ]; then echo "Missing env OVHAI_PLATFORM in config.env.sh"; exit 1; fi
-if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME in config.env.sh"; exit 1; fi
+if [ -z "${OVHAI_PLATFORM}" ]; then echo "Missing env OVHAI_PLATFORM in .env"; exit 1; fi
+if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME in .env"; exit 1; fi
 
-if [ -z "${OVHAI_USERNAME}" ]; then echo "Missing env OVHAI_USERNAME in ovhai.secrets.env"; exit 1; fi
-if [ -z "${OVHAI_PASSWORD}" ]; then echo "Missing env OVHAI_PASSWORD in ovhai.secrets.env"; exit 1; fi
-if [ -z "${OVHAI_PROJECTID}" ]; then echo "Missing env OVHAI_PROJECTID in ovhai.secrets.env"; exit 1; fi
-if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in ovhai.secrets.env"; exit 1; fi
-if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Missing env OVHAI_DOCKER_REGISTRY in ovhai.secrets.env"; exit 1; fi
+if [ -z "${OVHAI_USERNAME}" ]; then echo "Missing env OVHAI_USERNAME in env/ovhai.credentials.env"; exit 1; fi
+if [ -z "${OVHAI_PASSWORD}" ]; then echo "Missing env OVHAI_PASSWORD in env/ovhai.credentials.env"; exit 1; fi
+if [ -z "${OVHAI_PROJECTID}" ]; then echo "Missing env OVHAI_PROJECTID in env/ovhai.credentials.env"; exit 1; fi
+if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in env/ovhai.credentials.env"; exit 1; fi
+if [ -z "${OVHAI_DOCKER_REGISTRY}" ]; then echo "Missing env OVHAI_DOCKER_REGISTRY in env/ovhai.credentials.env"; exit 1; fi
 
 
 install_ovhai() {

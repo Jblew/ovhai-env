@@ -4,4 +4,4 @@
 /ovhai*.zip
 /ovhai.me.json
 /docker-registry-prefix.value
-/ovhai.secrets.env
+/ovhai.credentials.env
