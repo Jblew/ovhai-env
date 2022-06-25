@@ -5,6 +5,7 @@ set -e
 
 if [ -z "${UPLOAD_PATH}" ]; then echo "Missing env UPLOAD_PATH"; exit 1; fi
 if [ -z "${CHECKSUM}" ]; then echo "Missing env CHECKSUM"; exit 1; fi
+if [ -z "${NAME}" ]; then echo "Missing env NAME"; exit 1; fi
 if [ -z "${VOLUME_NAME_OUT_FILE}" ]; then echo "Missing env VOLUME_NAME_OUT_FILE"; exit 1; fi
 
 source ../.env
