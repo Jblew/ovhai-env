@@ -14,6 +14,6 @@ if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME in .env"; exit 1; f
 if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in env/ovhai.credentials.env"; exit 1; fi
 
 VOLUME_NAME="${IMAGE_NAME}-volume-${NAME}-${CHECKSUM}"
-./ovhai data upload "${OVHAI_REGION}" "${VOLUME_NAME}" "${UPLOAD_PATH}"
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_NAME}" "${UPLOAD_PATH}" \
     --remove-prefix "${UPLOAD_PATH}"
 echo -n "${VOLUME_NAME}" > "${VOLUME_NAME_OUT_FILE}"
