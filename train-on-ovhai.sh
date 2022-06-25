@@ -26,11 +26,11 @@ VOLUME_DATA="$(cat "${VOLUMENAME_PATH_DATA}")@${OVHAI_REGION}"
 VOLUME_PARAMSYML="$(cat "${VOLUMENAME_PATH_PARAMSYML}")@${OVHAI_REGION}"
 VOLUME_OUTPUTS="$(cat "${VOLUMENAME_PATH_OUTPUTS}")@${OVHAI_REGION}"
 echo "Image: ${IMAGE_PATH}"
-env/ovhai job run "${IMAGE_PATH}" \
+./ovhai job run "${IMAGE_PATH}" \
     --cpu 2 --gpu 1 \
     -v "${VOLUME_SRC}:/workdir/src:ro" \
     -v "${VOLUME_DATA}:/workdir/data:ro" \
-    -v "${VOLUME_PARAMSYML}:/workdir/params.yml:ro" \
+    -v "${VOLUME_PARAMSYML}:/workdir/params.yaml:ro" \
     -v "${VOLUME_OUTPUTS}:/workdir/outputs:rw" \
     --output json \
     -- bash -c "du -ha /workdir && du -ha /outputs && cd /workdir && python src/train.py" \

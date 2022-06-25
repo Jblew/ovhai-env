@@ -13,8 +13,8 @@ if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in env/ovhai.cr
 VOLUME_OUTPUTS="$(cat "${VOLUMENAME_PATH_OUTPUTS}")"
 OVHAI_JOB_ID="$(cat "${JOB_ID_FILE}")"
 
-env/ovhai job logs -f "${OVHAI_JOB_ID}"
-env/ovhai data download "${OVHAI_REGION}" "${VOLUME_OUTPUTS}" \
+./ovhai job logs -f "${OVHAI_JOB_ID}"
+./ovhai data download "${OVHAI_REGION}" "${VOLUME_OUTPUTS}" \
     --output "${OUTPUTS_PATH}/"
 
 echo "Done"

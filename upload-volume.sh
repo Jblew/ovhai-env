@@ -15,4 +15,5 @@ if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in env/ovhai.cr
 
 VOLUME_NAME="${IMAGE_NAME}-volume-${NAME}-${CHECKSUM}"
 ./ovhai data upload "${OVHAI_REGION}" "${VOLUME_NAME}" "${UPLOAD_PATH}"
+    --remove-prefix "${UPLOAD_PATH}"
 echo -n "${VOLUME_NAME}" > "${VOLUME_NAME_OUT_FILE}"
