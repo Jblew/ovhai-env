@@ -1,41 +1,55 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="${DIR}/.."
 cd "${DIR}"
 set -e
 
-if [ -z "${JOB_STATUS_FILE}" ]; then echo "Missing env JOB_STATUS_FILE"; exit 1; fi
-if [ -z "${JOB_ID_FILE}" ]; then echo "Missing env JOB_ID_FILE"; exit 1; fi
-if [ -z "${VOLUMENAME_PATH_SRC}" ]; then echo "Missing env VOLUME_PATH_SRC"; exit 1; fi
-if [ -z "${VOLUMENAME_PATH_DATA}" ]; then echo "Missing env VOLUMENAME_PATH_DATA"; exit 1; fi
-if [ -z "${VOLUMENAME_PATH_PARAMSYML}" ]; then echo "Missing env VOLUMENAME_PATH_PARAMSYML"; exit 1; fi
-if [ -z "${VOLUMENAME_PATH_OUTPUTS}" ]; then echo "Missing env VOLUMENAME_PATH_OUTPUTS"; exit 1; fi
-
 source "${DIR}/../.env"
 source "${DIR}/ovhai.credentials.env"
-
 if [ -z "${IMAGE_NAME}" ]; then echo "Missing env IMAGE_NAME in .env"; exit 1; fi
 if [ -z "${OVHAI_REGION}" ]; then echo "Missing env OVHAI_REGION in env/ovhai.credentials.env"; exit 1; fi
+if [ -z "${JOB_STATUS_JSON_FILE}" ]; then echo "Missing env JOB_STATUS_JSON_FILE in .env file"; exit 1; fi
+if [ -z "${JOB_STATUS_ID_FILE}" ]; then echo "Missing env JOB_STATUS_ID_FILE in .env file"; exit 1; fi
+if [ -z "${VOLUME_DATA_NAME}" ]; then echo "Missing env VOLUME_DATA_NAME in .env file"; exit 1; fi
+if [ -z "${VOLUME_DATA_DIR}" ]; then echo "Missing env VOLUME_DATA_DIR in .env file"; exit 1; fi
+if [ -z "${VOLUME_DATA_MOUNT}" ]; then echo "Missing env VOLUME_DATA_MOUNT in .env file"; exit 1; fi
+if [ -z "${VOLUME_SRC_NAME}" ]; then echo "Missing env VOLUME_SRC_NAME in .env file"; exit 1; fi
+if [ -z "${VOLUME_SRC_DIR}" ]; then echo "Missing env VOLUME_SRC_DIR in .env file"; exit 1; fi
+if [ -z "${VOLUME_SRC_MOUNT}" ]; then echo "Missing env VOLUME_SRC_MOUNT in .env file"; exit 1; fi
+if [ -z "${VOLUME_OUTPUTS_NAME}" ]; then echo "Missing env VOLUME_OUTPUTS_NAME in .env file"; exit 1; fi
+if [ -z "${VOLUME_OUTPUTS_DIR}" ]; then echo "Missing env VOLUME_OUTPUTS_DIR in .env file"; exit 1; fi
+if [ -z "${VOLUME_OUTPUTS_MOUNT}" ]; then echo "Missing env VOLUME_OUTPUTS_MOUNT in .env file"; exit 1; fi
+if [ -z "${CONTAINER_WORKDIR}" ]; then echo "Missing env CONTAINER_WORKDIR in .env file"; exit 1; fi
+if [ -z "${CONTAINER_CMD}" ]; then echo "Missing env CONTAINER_CMD in .env file"; exit 1; fi
+if [ -z "${OVHAI_CPU_COUNT}" ]; then echo "Missing env OVHAI_CPU_COUNT in .env file"; exit 1; fi
+if [ -z "${OVHAI_GPU_COUNT}" ]; then echo "Missing env OVHAI_GPU_COUNT in .env file"; exit 1; fi
+if [ -z "${CONTAINER_PARAMSJSON_ENV_NAME}" ]; then echo "Missing env CONTAINER_PARAMSJSON_ENV_NAME in .env file"; exit 1; fi
+if [ -z "${PARAMSJSON_FILE}" ]; then echo "Missing env PARAMSJSON_FILE in .env file"; exit 1; fi
 
 DOCKER_REGISTRY_PREFIX=$(cat "${DIR}/docker-registry-prefix.value")
-if [ -z "${DOCKER_REGISTRY_PREFIX}" ]; then echo "Missing docker registry prefix in in env/docker-registry-prefix.value"; exit 1; fi
+if [ -z "${DOCKER_REGISTRY_PREFIX}" ]; then echo "Missing docker registry prefix in in env/docker-registry-prefix.value. Di you publish the image?"; exit 1; fi
 
+echo "Uploading data volume"
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_DATA_NAME}" "${VOLUME_DATA_DIR}" --remove-prefix "${VOLUME_DATA_DIR}/"
+echo "Uploading src volume"
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_SRC_NAME}" "${VOLUME_SRC_DIR}" --remove-prefix "${VOLUME_SRC_DIR}/"
+echo "Uploading outputs volume"
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_OUTPUTS_NAME}" "${VOLUME_OUTPUTS_DIR}" --remove-prefix "${VOLUME_OUTPUTS_DIR}/"
+echo "Done uploading volumes"
+
+echo "Starting training job on OVHAI"
 # Run the job
 IMAGE_PATH="${DOCKER_REGISTRY_PREFIX}/${IMAGE_NAME}"
-VOLUME_SRC="$(cat "${VOLUMENAME_PATH_SRC}")@${OVHAI_REGION}"
-VOLUME_DATA="$(cat "${VOLUMENAME_PATH_DATA}")@${OVHAI_REGION}"
-VOLUME_PARAMSYML="$(cat "${VOLUMENAME_PATH_PARAMSYML}")@${OVHAI_REGION}"
-VOLUME_OUTPUTS="$(cat "${VOLUMENAME_PATH_OUTPUTS}")@${OVHAI_REGION}"
-echo "Image: ${IMAGE_PATH}"
-
+PARAMSJSON=$(cat "${PARAMSJSON_FILE} | jq -c)
 ./ovhai job run "${IMAGE_PATH}" \
-    --cpu 2 --gpu 1 \
-    -v "${VOLUME_SRC}:/workdir/src:ro" \
-    -v "${VOLUME_DATA}:/workdir/data:ro" \
-    -v "${VOLUME_PARAMSYML}:/workdir/params.yaml:ro" \
-    -v "${VOLUME_OUTPUTS}:/workdir/outputs:rw" \
+    --cpu "${OVHAI_CPU_COUNT}" --gpu "${OVHAI_GPU_COUNT}" \
+    -v "${VOLUME_DATA_NAME}:${VOLUME_DATA_MOUNT}:ro" \
+    -v "${VOLUME_SRC_NAME}:${VOLUME_SRC_MOUNT}:ro" \
+    -v "${VOLUME_OUTPUTS_NAME}:${VOLUME_OUTPUTS_MOUNT}:rw" \
     --output json \
-    -- bash -c "sleep 7 && du -ha /workdir && cd /workdir && python src/train.py" \
-    > "${JOB_STATUS_FILE}"
+    --env "${CONTAINER_PARAMSJSON_ENV_NAME}=${PARAMSJSON}" \
+    -- bash -c "sleep 7 && du -ha ${CONTAINER_WORKDIR} && cd ${CONTAINER_WORKDIR} && ${CONTAINER_CMD}" \
+    > "${JOB_STATUS_JSON_FILE}"
 
-OVHAI_JOB_ID="$(cat "${JOB_STATUS_FILE}" | jq  -r '.id')"
-echo -n "${OVHAI_JOB_ID}" > "${JOB_ID_FILE}"
+OVHAI_JOB_ID="$(cat "${JOB_STATUS_JSON_FILE}" | jq  -r '.id')"
+echo -n "${OVHAI_JOB_ID}" > "${JOB_STATUS_ID_FILE}"
