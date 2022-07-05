@@ -13,7 +13,7 @@ OVHAI_CREDENTIALS_OUT_PATH="${DIR}/../env/ovhai.credentials.env"
 
 unlock_bitwarden() {
     echo "# Unlocking bitwarden"
-    BW_SESSION="$(bw unlock --raw)"
+    export BW_SESSION="$(bw unlock --raw)"
 
     echo "Done"
     echo ""
