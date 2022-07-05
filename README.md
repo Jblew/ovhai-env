@@ -3,7 +3,7 @@ Environment for AI training management on OVHAI
 
 
 
-## Setup:
+## Setup
 
 1. Install required CLI tools: Bash, Docker, [Bitwarden CLI](https://bitwarden.com/help/cli/), [jq CLI](https://stedolan.github.io/jq/).
 
@@ -57,11 +57,11 @@ Environment for AI training management on OVHAI
 
 
 
-## Usage:
+## Usage
 
 1. Run `env/image-build.sh` to build docker image and push to ovhai registry
 
-2. Run job `env/train-on-ovhai.sh`. This will create a directory for this experiment in the `jobs/` with configuration files that will be used in the next step to obtain correct results.
+2. Run training job using `env/train-on-ovhai.sh`. This will create a directory for this experiment in the `jobs/` with configuration files that will be used in the next step to obtain correct results. The params.json file will be serialized to env variable and passed to the training container.
 
 3. Get logs and download results using `env/results-download.sh`. This command will download logs and outputs for any subdirectory in `jobs/` that does not already have them downloaded
 
