@@ -16,13 +16,14 @@ for JOB_DIR in "${JOBS_DIR}"/*/ ; do
         echo "Downloding logs and outputs for ${JOB_DIR}"
         JOB_ID_FILE="${JOB_DIR}/id"
         OVHAI_JOB_ID="$(cat "${JOB_ID_FILE}")"
-        ./ovhai job logs -f "${OVHAI_JOB_ID}"
+        ./ovhai job logs -f "${OVHAI_JOB_ID}" | tee "${LOG_FILE}"
         VOLUME_NAME_FILE="${JOB_DIR}/outputs.volume.name"
         VOLUME_OUTPUTS_NAME="$(cat "${VOLUME_NAME_FILE}")"
+        VOLUME_OUTPUTS_DIR="${JOB_DIR}/outputs"
         ./ovhai data download "${OVHAI_REGION}" "${VOLUME_OUTPUTS_NAME}" \
             --output "${VOLUME_OUTPUTS_DIR}/"
     else
-        echo "${LOG_FILE} already exists"
+        echo "Job ${JOB_DIR} already has logs downloaded to ${LOG_FILE}"
     fi
 done
 
