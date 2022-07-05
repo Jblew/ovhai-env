@@ -43,7 +43,7 @@ login_to_ovh_docker_registry() {
     echo "Logging in to docker registry"
     REGISTRY_PREFIX="${OVHAI_DOCKER_REGISTRY}/${OVHAI_PROJECTID}"
     docker login --username "${OVHAI_USERNAME}" --password "${OVHAI_PASSWORD}" "${REGISTRY_PREFIX}"
-    echo -n "${REGISTRY_PREFIX}" > docker-registry-prefix.value
+    echo -n "${REGISTRY_PREFIX}" > "${DIR}/docker-registry-prefix.value"
     echo "Done"
     echo ""
 }

@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="${DIR}/.."
 cd "${DIR}"
 set -e
 
 source "${DIR}/../.env"
+if [ -z "${DVC_S3_CREDENTIALS_OUT_FILE}" ]; then echo "Missing env DVC_S3_CREDENTIALS_OUT_FILE in .env"; exit 1; fi
+if [ -z "${BITWARDEN_DVC_S3_CREDENTIALS_SECRET}" ]; then echo "Missing env BITWARDEN_DVC_S3_CREDENTIALS_SECRET in .env"; exit 1; fi
+if [ -z "${BITWARDEN_OVHAI_SECRET}" ]; then echo "Missing env BITWARDEN_OVHAI_SECRET in .env"; exit 1; fi
 
-DVC_S3_CREDENTIALS_OUT_PATH="${DIR}/../.dvc/aws.credentials"
 OVHAI_CREDENTIALS_OUT_PATH="${DIR}/../env/ovhai.credentials.env"
 
 unlock_bitwarden() {
@@ -28,7 +31,7 @@ load_dvc_s3_credentials() {
     echo "[default]
 aws_access_key_id=${AWS_ACCESSKEYID}
 aws_secret_access_key=${AWS_SECRETACCESSKEY}
-    " > "${DVC_S3_CREDENTIALS_OUT_PATH}"
+    " > "${DVC_S3_CREDENTIALS_OUT_FILE}"
 
     echo "Done"
     echo ""
