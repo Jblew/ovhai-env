@@ -34,6 +34,7 @@ VOLUME_OUTPUTS_NAME="${VOLUME_OUTPUTS_NAME_BASE}${JOB_ID}"
 VOLUME_OUTPUTS_DIR="${JOB_DIR}/outputs"
 mkdir -p "${VOLUME_OUTPUTS_DIR}"
 touch "${VOLUME_OUTPUTS_DIR}/.keep"
+echo -n "${VOLUME_OUTPUTS_NAME}" > "${JOB_DIR}/outputs.volume.name"
 echo "Done"
 echo ""
 
