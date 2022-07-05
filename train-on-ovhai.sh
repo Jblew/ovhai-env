@@ -37,10 +37,12 @@ echo "Uploading outputs volume"
 ./ovhai data upload "${OVHAI_REGION}" "${VOLUME_OUTPUTS_NAME}" "${VOLUME_OUTPUTS_DIR}" --remove-prefix "${VOLUME_OUTPUTS_DIR}/"
 echo "Done uploading volumes"
 
+
 echo "Starting training job on OVHAI"
 # Run the job
 IMAGE_PATH="${DOCKER_REGISTRY_PREFIX}/${IMAGE_NAME}"
-PARAMSJSON=$(cat "${PARAMSJSON_FILE} | jq -c)
+PARAMSJSON=$(cat "${PARAMSJSON_FILE}" | jq -c)
+
 ./ovhai job run "${IMAGE_PATH}" \
     --cpu "${OVHAI_CPU_COUNT}" --gpu "${OVHAI_GPU_COUNT}" \
     -v "${VOLUME_DATA_NAME}:${VOLUME_DATA_MOUNT}:ro" \
