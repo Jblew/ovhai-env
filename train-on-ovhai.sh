@@ -29,12 +29,11 @@ if [ -z "${PARAMSJSON_FILE}" ]; then echo "Missing env PARAMSJSON_FILE in .env f
 DOCKER_REGISTRY_PREFIX=$(cat "${DIR}/docker-registry-prefix.value")
 if [ -z "${DOCKER_REGISTRY_PREFIX}" ]; then echo "Missing docker registry prefix in in env/docker-registry-prefix.value. Di you publish the image?"; exit 1; fi
 
-echo "Uploading data volume"
-./ovhai data upload "${OVHAI_REGION}" "${VOLUME_DATA_NAME}" "${VOLUME_DATA_DIR}" --remove-prefix "${VOLUME_DATA_DIR}/"
-echo "Uploading src volume"
-./ovhai data upload "${OVHAI_REGION}" "${VOLUME_SRC_NAME}" "${VOLUME_SRC_DIR}" --remove-prefix "${VOLUME_SRC_DIR}/"
-echo "Uploading outputs volume"
-./ovhai data upload "${OVHAI_REGION}" "${VOLUME_OUTPUTS_NAME}" "${VOLUME_OUTPUTS_DIR}" --remove-prefix "${VOLUME_OUTPUTS_DIR}/"
+echo "Uploading volumes"
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_DATA_NAME}" "${VOLUME_DATA_DIR}" --remove-prefix "${VOLUME_DATA_DIR}/" &
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_SRC_NAME}" "${VOLUME_SRC_DIR}" --remove-prefix "${VOLUME_SRC_DIR}/" &
+./ovhai data upload "${OVHAI_REGION}" "${VOLUME_OUTPUTS_NAME}" "${VOLUME_OUTPUTS_DIR}" --remove-prefix "${VOLUME_OUTPUTS_DIR}/" &
+wait
 echo "Done uploading volumes"
 
 
@@ -45,13 +44,13 @@ PARAMSJSON=$(cat "${PARAMSJSON_FILE}" | jq -c)
 
 ./ovhai job run "${IMAGE_PATH}" \
     --cpu "${OVHAI_CPU_COUNT}" --gpu "${OVHAI_GPU_COUNT}" \
-    -v "${VOLUME_DATA_NAME}:${VOLUME_DATA_MOUNT}:ro" \
-    -v "${VOLUME_SRC_NAME}:${VOLUME_SRC_MOUNT}:ro" \
-    -v "${VOLUME_OUTPUTS_NAME}:${VOLUME_OUTPUTS_MOUNT}:rw" \
+    -v "${VOLUME_DATA_NAME}@${OVHAI_REGION}:${VOLUME_DATA_MOUNT}:ro" \
+    -v "${VOLUME_SRC_NAME}@${OVHAI_REGION}:${VOLUME_SRC_MOUNT}:ro" \
+    -v "${VOLUME_OUTPUTS_NAME}@${OVHAI_REGION}:${VOLUME_OUTPUTS_MOUNT}:rw" \
     --output json \
     --env "${CONTAINER_PARAMSJSON_ENV_NAME}=${PARAMSJSON}" \
     -- bash -c "sleep 7 && du -ha ${CONTAINER_WORKDIR} && cd ${CONTAINER_WORKDIR} && ${CONTAINER_CMD}" \
-    > "${JOB_STATUS_JSON_FILE}"
+    | jq > "${JOB_STATUS_JSON_FILE}"
 
 OVHAI_JOB_ID="$(cat "${JOB_STATUS_JSON_FILE}" | jq  -r '.id')"
 echo -n "${OVHAI_JOB_ID}" > "${JOB_STATUS_ID_FILE}"
