@@ -21,7 +21,7 @@ Environment for AI training management on OVHAI
 
    ```bash
    $ git submodule init
-   $ git submodule add git@github.com/Jblew/ovhai-env.git env
+   $ git submodule add git@github.com:Jblew/ovhai-env.git env
    ```
 
 4. Run `env/bootstrap.sh`
